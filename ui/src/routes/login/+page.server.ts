@@ -18,19 +18,24 @@ export const actions: Actions = {
 			body: JSON.stringify({ username, password })
 		});
 
-		const cookiesToSet = setCookie.parse(res);
+		if (res.status === 200 || res.status === 201 || res.status === 204) {
+			const setCookies = res.headers.get('set-cookie')!.split('SameSite=Lax,');
+			setCookies[0] = setCookies[0].concat('SameSite=Lax;');
 
-		cookiesToSet.forEach((cookie: any) => {
-			cookies.set(cookie.name, cookie.value, {
-				path: cookie.path,
-				domain: cookie.domain,
-				expires: cookie.expires,
-				httpOnly: cookie.httpOnly,
-				secure: cookie.secure
+			const cookiesToSet = setCookie.parse(setCookies);
+
+			cookiesToSet.forEach((cookie: any) => {
+				cookies.set(cookie.name, cookie.value, {
+					path: cookie.path,
+					domain: cookie.domain,
+					expires: cookie.expires,
+					httpOnly: cookie.httpOnly,
+					secure: cookie.secure
+				});
 			});
-		});
+		}
 
-		throw redirect(301, '/');
+		throw redirect(301, '/login');
 	}
 };
 
